@@ -16,7 +16,7 @@
   <!-- Other classes to be compiled into your SWF -->
   <classpaths>
     <class path="src" />
-    <class path="sample" />
+    <class path="..\..\src" />
   </classpaths>
   <!-- Build options -->
   <build>
@@ -51,7 +51,7 @@
   </includeLibraries>
   <!-- SWC Libraries -->
   <libraryPaths>
-    <element path="sample\MinimalComps_0_9_10.swc" />
+    <element path="" />
   </libraryPaths>
   <!-- External Libraries -->
   <externalLibraryPaths>
@@ -71,7 +71,7 @@
   </library>
   <!-- Class files to compile (other referenced classes will automatically be included) -->
   <compileTargets>
-    <compile path="sample\exp01.as" />
+    <compile path="src\exp01.as" />
   </compileTargets>
   <!-- Paths to exclude from the Project Explorer tree -->
   <hiddenPaths>
