@@ -1,0 +1,142 @@
+<languageVersion : 1.0;>
+
+kernel Rgb2Hsv
+<   namespace:"Alumican";
+    vendor:"Alumican.net";
+    version:1;
+    description:"Convert rgb image to hsv image (r:hue, g:saturation, b:value).";
+>
+{
+    input  image4 src;
+    output pixel4 dst;
+    
+    const float C1 = 0.5 / 3.0;
+    const float C2 = 1.0 / 3.0;    
+    const float C3 = 2.0 / 3.0;    
+   
+    void
+    evaluatePixel()
+    {
+        // Obtain the input pixel color
+        float4 rgb = sampleNearest(src, outCoord());
+        
+        // Maximum value
+        float rgb_max;
+        if (rgb.r > rgb.g)
+        {
+            if (rgb.b > rgb.r)
+            {
+                rgb_max = rgb.b;
+            }
+            else
+            {
+                rgb_max = rgb.r;
+            }
+        }
+        else
+        {
+            if (rgb.b > rgb.g)
+            {
+                rgb_max = rgb.b;
+            }
+            else
+            {
+                rgb_max = rgb.g;
+            }
+        }
+        
+        /*
+        float _max = (_rgb.r > _rgb.g) ? ( (_rgb.b > _rgb.r) ? _rgb.b : _rgb.r ) :
+                                         ( (_rgb.b > _rgb.g) ? _rgb.b : _rgb.g ) ;
+        */
+        
+        // Minimum value
+        float rgb_min;
+        if (rgb.r < rgb.g)
+        {
+            if (rgb.b < rgb.r)
+            {
+                rgb_min = rgb.b;
+            }
+            else
+            {
+                rgb_min = rgb.r;
+            }
+        }
+        else
+        {
+            if (rgb.b < rgb.g)
+            {
+                rgb_min = rgb.b;
+            }
+            else
+            {
+                rgb_min = rgb.g;
+            }
+        }
+        
+        /*
+        float _min = (_rgb.r < _rgb.g) ? ( (_rgb.b < _rgb.r) ? _rgb.b : _rgb.r ) :
+                                         ( (_rgb.b < _rgb.g) ? _rgb.b : _rgb.g ) ;
+        */
+        
+        // V
+        dst.b = rgb_max;
+        
+        if (rgb_max == 0.0)
+        {
+            dst.r = dst.g = 0.0;
+        }
+        else
+        {
+            float dif = rgb_max - rgb_min;
+            
+            // S
+            dst.g = dif / rgb_max;
+            
+            // H
+            if (rgb.r == rgb_max)
+            {
+                dst.r = (rgb.g - rgb.b) / dif * C1;
+            }
+            else if (rgb.g == rgb_max)
+            {
+                dst.r = (rgb.b - rgb.r) / dif * C1 + C2;
+            }
+            else
+            {
+                dst.r = (rgb.r - rgb.g) / dif * C1 + C3;
+            }
+            
+            /*
+            // H
+            float cr = (rgb_max - rgb.r) / dif;
+            float cg = (rgb_max - rgb.g) / dif;
+            float cb = (rgb_max - rgb.b) / dif;
+            if (cr == 0.0)
+            {
+                dst.r = (cb - cg      ) / 6.0;
+            }
+            else if (cg == 0.0)
+            {
+                dst.r = (cr - cb + 2.0) / 6.0;
+            }
+            else
+            {
+                dst.r = (cg - cr + 4.0) / 6.0;
+            }
+            */
+            
+            /*
+            dst.r = (cr == 0.0) ? (cb - cg      ) / 6.0 :
+                    (cg == 0.0) ? (cr - cb + 2.0) / 6.0 :
+                                  (cg - cr + 4.0) / 6.0 ;
+            */
+            
+            if (dst.r < 0.0) dst.r += 1.0;
+        }
+        
+        // Set the alpha value equal to the alpha of the input
+        dst.a = rgb.a;
+    }
+}

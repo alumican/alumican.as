@@ -1,0 +1,129 @@
+<languageVersion : 1.0;>
+
+kernel Susan5x5
+<   namespace:"Alumican";
+    vendor:"Alumican.net";
+    version:1;
+    description:"Corner detecter";
+>
+{
+    input  image4 src;
+    output pixel4 dst;
+    
+    // Number of scaned pixels
+    const float N = 12.0;
+    
+    // Parameters
+    parameter float threshReject
+    <
+        minValue    :0.0;
+        maxValue    :12.0;
+        defaultValue:0.2;
+    >;
+    
+    parameter float threshCorner
+    <
+        minValue    :0.0;
+        maxValue    :3.0;
+        defaultValue:0.5;
+    >;
+    
+    parameter int outputMode
+    <
+        minValue:0;
+        maxValue:1;
+        defaultValue:0;
+    >;
+    
+    void
+    evaluatePixel()
+    {
+        // Center
+        float2 cxy    = outCoord();
+        float4 ccolor = sampleNearest(src, cxy);
+        
+        // Around
+        float2 axy;
+        float4 acolor;
+        
+        float s = 0.0;
+        
+        // 1. Rejection
+        axy = float2(cxy.x      , cxy.y - 1.0); acolor = sampleNearest(src, axy); s += abs(acolor.r - ccolor.r) + abs(acolor.g - ccolor.g) + abs(acolor.b - ccolor.b);
+        axy = float2(cxy.x + 1.0, cxy.y      ); acolor = sampleNearest(src, axy); s += abs(acolor.r - ccolor.r) + abs(acolor.g - ccolor.g) + abs(acolor.b - ccolor.b);
+        axy = float2(cxy.x      , cxy.y - 1.0); acolor = sampleNearest(src, axy); s += abs(acolor.r - ccolor.r) + abs(acolor.g - ccolor.g) + abs(acolor.b - ccolor.b);
+        axy = float2(cxy.x - 1.0, cxy.y      ); acolor = sampleNearest(src, axy); s += abs(acolor.r - ccolor.r) + abs(acolor.g - ccolor.g) + abs(acolor.b - ccolor.b);
+        
+        if (s >= threshReject)
+        {
+            // 2. Corner detection
+            
+            // 5x5 round filter
+            // 0aaa0
+            // a000a
+            // a0c0a
+            // a000a
+            // 0aaa0
+            
+            s = 0.0;
+            
+            axy = float2(cxy.x - 1.0, cxy.y - 2.0); acolor = sampleNearest(src, axy); s += acolor.r + acolor.g + acolor.b;
+            axy = float2(cxy.x      , cxy.y - 2.0); acolor = sampleNearest(src, axy); s += acolor.r + acolor.g + acolor.b;
+            axy = float2(cxy.x + 1.0, cxy.y - 2.0); acolor = sampleNearest(src, axy); s += acolor.r + acolor.g + acolor.b;
+            axy = float2(cxy.x - 2.0, cxy.y - 1.0); acolor = sampleNearest(src, axy); s += acolor.r + acolor.g + acolor.b;
+            axy = float2(cxy.x + 2.0, cxy.y - 1.0); acolor = sampleNearest(src, axy); s += acolor.r + acolor.g + acolor.b;
+            axy = float2(cxy.x - 2.0, cxy.y      ); acolor = sampleNearest(src, axy); s += acolor.r + acolor.g + acolor.b;
+            axy = float2(cxy.x + 2.0, cxy.y      ); acolor = sampleNearest(src, axy); s += acolor.r + acolor.g + acolor.b;
+            axy = float2(cxy.x - 2.0, cxy.y + 1.0); acolor = sampleNearest(src, axy); s += acolor.r + acolor.g + acolor.b;
+            axy = float2(cxy.x + 2.0, cxy.y + 1.0); acolor = sampleNearest(src, axy); s += acolor.r + acolor.g + acolor.b;
+            axy = float2(cxy.x - 1.0, cxy.y + 2.0); acolor = sampleNearest(src, axy); s += acolor.r + acolor.g + acolor.b;
+            axy = float2(cxy.x      , cxy.y + 2.0); acolor = sampleNearest(src, axy); s += acolor.r + acolor.g + acolor.b;
+            axy = float2(cxy.x + 1.0, cxy.y + 2.0); acolor = sampleNearest(src, axy); s += acolor.r + acolor.g + acolor.b;
+            
+            s /= N;
+            
+            if (abs(ccolor.r + ccolor.g + ccolor.b - s) > threshCorner)
+            {
+                // Corner
+                if (outputMode == 0)
+                {
+                    dst.r = 1.0;
+                    dst.g = 0.0;
+                    dst.b = 0.0;
+                    dst.a = ccolor.a;
+                }
+                else if (outputMode == 1)
+                {
+                    dst.rgb = ccolor.rgb;
+                    dst.a   = s / 3.0;
+                }
+            }
+            else
+            {
+                // Reject
+                if (outputMode == 0)
+                {
+                    dst = ccolor;
+                }
+                else if (outputMode == 1)
+                {
+                    dst.rgb = ccolor.rgb;
+                    dst.a   = 0.0;
+                }
+            }
+        }
+        else
+        {
+            // Reject
+            if (outputMode == 0)
+            {
+                dst = ccolor;
+            }
+            else if (outputMode == 1)
+            {
+                dst.rgb = ccolor.rgb;
+                dst.a   = 0.0;
+            }
+        }
+    }
+}

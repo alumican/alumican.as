@@ -1,7 +1,13 @@
-*
+#
+/*
+/src/*
+/src/net/*
 
-!src/net/alumican/*
-!example/*
+#
+!/src/
+!/src/net/
+!/src/net/alumican/
+!/example/
 
-!.gitignore
-!README
+!/.gitignore
+!/README

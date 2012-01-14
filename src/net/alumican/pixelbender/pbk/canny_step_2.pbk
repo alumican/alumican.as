@@ -1,0 +1,79 @@
+<languageVersion : 1.0;>
+
+kernel CannyStep2
+<   namespace:"alumican";
+    vendor:"alumican.net";
+    version:1;
+    description:"Canny edge detector";
+>
+{
+    input  image4 src;
+    output pixel4 dst;
+    
+    void evaluatePixel()
+    {
+        // Center Pixel
+        float2 c_xy    = outCoord();
+        
+        // Around Pixel
+        float2 a_xy;
+        
+        // STEP2. Sobel Filter
+        float fx = 0.0;
+        float fy = 0.0;
+        
+        a_xy = float2(c_xy.x - 1.0, c_xy.y - 1.0); fx -= sampleNearest(src, a_xy).r * 1.0;
+        a_xy = float2(c_xy.x - 1.0, c_xy.y      ); fx -= sampleNearest(src, a_xy).r * 2.0;
+        a_xy = float2(c_xy.x - 1.0, c_xy.y + 1.0); fx -= sampleNearest(src, a_xy).r * 1.0;
+        a_xy = float2(c_xy.x + 1.0, c_xy.y - 1.0); fx += sampleNearest(src, a_xy).r * 1.0;
+        a_xy = float2(c_xy.x + 1.0, c_xy.y      ); fx += sampleNearest(src, a_xy).r * 2.0;
+        a_xy = float2(c_xy.x + 1.0, c_xy.y + 1.0); fx += sampleNearest(src, a_xy).r * 1.0;
+        
+        a_xy = float2(c_xy.x - 1.0, c_xy.y - 1.0); fy -= sampleNearest(src, a_xy).r * 1.0;
+        a_xy = float2(c_xy.x      , c_xy.y - 1.0); fy -= sampleNearest(src, a_xy).r * 2.0;
+        a_xy = float2(c_xy.x + 1.0, c_xy.y - 1.0); fy -= sampleNearest(src, a_xy).r * 1.0;
+        a_xy = float2(c_xy.x - 1.0, c_xy.y + 1.0); fy += sampleNearest(src, a_xy).r * 1.0;
+        a_xy = float2(c_xy.x      , c_xy.y + 1.0); fy += sampleNearest(src, a_xy).r * 2.0;
+        a_xy = float2(c_xy.x + 1.0, c_xy.y + 1.0); fy += sampleNearest(src, a_xy).r * 1.0;
+        
+        // Edge Intensity
+        float i = sqrt(fx * fx + fy * fy);
+        dst.a = i;
+        
+        if (fx == 0.0)
+        {
+            // Infinity = 90 degree direction ?
+            dst.g = 1.0;
+            dst.b = 0.0;
+        }
+        else
+        {
+            float tan = fy / fx;
+            
+            if (-0.4142 < tan && tan <= 0.4142)
+            {
+                // 0 degree direction
+                dst.g = 0.0;
+                dst.b = 0.0;
+            }
+            else if (0.4142 < tan && tan < 2.4142)
+            {
+                // 45 degree direction
+                dst.g = 0.0;
+                dst.b = 1.0;
+            }
+            else if (-2.4142 < tan && tan <= -0.4142)
+            {
+                // 135 degree direction
+                dst.g = 1.0;
+                dst.b = 1.0;
+            }
+            else
+            {
+                // 90 degree direction
+                dst.g = 1.0;
+                dst.b = 0.0;
+            }
+        }
+    }
+}

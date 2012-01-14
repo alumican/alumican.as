@@ -1,0 +1,25 @@
+<languageVersion : 1.0;> 
+kernel BlendAdd 
+<
+    namespace   : "net.alumican";
+    vendor      : "alumican";
+    version     : 1;
+    description : "Blend Add";
+>
+{
+    input image4 background;
+    input image4 foreground;
+    
+    output pixel4 dst;
+    
+    void evaluatePixel()
+    {
+        float4 a = sampleNearest(foreground, outCoord());
+        float4 b = sampleNearest(background, outCoord());
+        
+        dst.r = a.r + b.r;
+        dst.g = a.g + b.g;
+        dst.b = a.b + b.b;
+        dst.a = max(a.a, b.a);
+    }
+}

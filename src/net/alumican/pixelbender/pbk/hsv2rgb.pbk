@@ -1,0 +1,73 @@
+<languageVersion : 1.0;>
+
+kernel Hsv2Rgb
+<   namespace:"Alumican";
+    vendor:"Alumican.net";
+    version:1;
+    description:"Convert hsv image to rgb image (r:hue, g:saturation, b:value).";
+>
+{
+    input  image4 src;
+    output pixel4 dst;
+    
+    void
+    evaluatePixel()
+    {
+        // Obtain the input pixel color
+        float4 hsv = sampleNearest(src, outCoord());
+        
+        if (hsv.g == 0.0)
+        {
+            dst.r = dst.g = dst.b = hsv.b;
+        }
+        else
+        {
+            float i = floor(hsv.r * 6.0);
+            float f = hsv.r * 6.0 - i;
+            float v = hsv.b;
+            float m = v * (1.0 - hsv.g            );
+            float n = v * (1.0 - hsv.g * f        );
+            float k = v * (1.0 - hsv.g * (1.0 - f));
+            
+            if (i == 0.0)
+            {
+                dst.r = v;
+                dst.g = k;
+                dst.b = m;
+            }
+            else if (i == 1.0)
+            {
+                dst.r = n;
+                dst.g = v;
+                dst.b = m;
+            }
+            else if (i == 2.0)
+            {
+                dst.r = m;
+                dst.g = v;
+                dst.b = k;
+            }
+            else if (i == 3.0)
+            {
+                dst.r = m;
+                dst.g = n;
+                dst.b = v;
+            }
+            else if (i == 4.0)
+            {
+                dst.r = k;
+                dst.g = m;
+                dst.b = v;
+            }
+            else
+            {
+                dst.r = v;
+                dst.g = m;
+                dst.b = n;
+            }
+        }
+       
+        // Set the alpha value equal to the alpha of the input
+        dst.a = hsv.a;
+    }
+}

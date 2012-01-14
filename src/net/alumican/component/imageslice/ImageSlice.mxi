@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<macromedia-extension
+	name="ImageSlice"
+	version="1.0.0"
+	type="flashcomponentswc">
+	
+	<author name="Yukiya Okuda" />
+	
+	<products>
+		<product name="Flash" version="10" primary="true" />
+	</products>
+	
+	<description>
+		<![CDATA[
+		description
+		]]>
+	</description>
+	
+	<ui-access>
+		<![CDATA[
+		Yukiya Okuda
+		Copyright (C) alumican.net All Rights Reserved.
+		]]>
+	</ui-access>
+	
+	<license-agreement>
+		<![CDATA[
+		license
+		Copyright (C) alumican.net All Rights Reserved.
+		]]>
+	</license-agreement>
+	
+	<files>
+		<file source="ImageSlice.swc" destination="$flash/Components/ImageSlice" />
+	</files>
+	
+</macromedia-extension>

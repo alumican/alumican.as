@@ -1,0 +1,49 @@
+﻿package net.alumican.as3.ga.packets
+{
+	/**
+	 * Parents
+	 * インデックスのペアを保持するデータ構造
+	 *
+	 * @author alumican.net<Yukiya Okuda>
+	 */
+	public class Parents 
+	{
+		//----------------------------------------
+		//CLASS CONSTANTS
+		
+		
+		
+		
+		
+		//----------------------------------------
+		//VARIABLES
+		
+		/**
+		 * 親A
+		 */
+		public var a:uint;
+		
+		/**
+		 * 親B
+		 */
+		public var b:uint;
+		
+		
+		
+		
+		
+		//----------------------------------------
+		//METHODS
+		
+		/**
+		 * コンストラクタ
+		 * @param	a
+		 * @param	b
+		 */
+		public function Parents(a:uint = 0, b:uint = 0):void 
+		{
+			this.a = a;
+			this.b = b;
+		}
+	}
+}

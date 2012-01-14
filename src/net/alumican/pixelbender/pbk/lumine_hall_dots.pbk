@@ -1,0 +1,123 @@
+<languageVersion : 1.0;>
+
+kernel LumineHallDots
+<   namespace:"Alumican";
+    vendor:"Alumican.net";
+    version:1;
+    description:"Lumine Hall from MOTHER2";
+>
+{
+    input  image4 src;
+    output pixel4 dst;
+    
+    // Parameters
+    parameter float4 color0
+    <
+        minValue     : float4(0.0         , 0.0         , 0.0         , 0.0);
+        maxValue     : float4(1.0         , 1.0         , 1.0         , 1.0);
+        defaultValue : float4(40.0 / 255.0, 24.0 / 255.0, 56.0 / 255.0, 1.0);
+    >;
+    
+    parameter float4 color1
+    <
+        minValue     : float4(0.0         , 0.0         , 0.0         , 0.0);
+        maxValue     : float4(1.0         , 1.0         , 1.0         , 1.0);
+        defaultValue : float4(16.0 / 255.0, 32.0 / 255.0, 48.0 / 255.0, 1.0);
+    >;
+    
+    parameter float4 color2
+    <
+        minValue     : float4(0.0         , 0.0         , 0.0         , 0.0);
+        maxValue     : float4(1.0         , 1.0         , 1.0         , 1.0);
+        defaultValue : float4(80.0 / 255.0, 96.0 / 255.0, 48.0 / 255.0, 1.0);
+    >;
+    
+    parameter float4 color3
+    <
+        minValue     : float4(0.0          , 0.0          , 0.0          , 0.0);
+        maxValue     : float4(1.0          , 1.0          , 1.0          , 1.0);
+        defaultValue : float4(176.0 / 255.0, 240.0 / 255.0, 120.0 / 255.0, 1.0);
+    >;
+    
+    parameter float threshold
+    <
+        minValue     : float(0.0);
+        maxValue     : float(1.0);
+        defaultValue : float(0.5);
+    >;
+    
+    parameter int useGrayscale
+    <
+        minValue     : int(0);
+        maxValue     : int(1);
+        defaultValue : int(1);
+    >;
+    
+    void
+    evaluatePixel()
+    {
+        // Obtain the input pixel position
+        float2 ixy = outCoord();
+        
+        // Obtain the input pixel position in a dot
+        float2 quad = 4.0 * floor(ixy / 4.0);
+        float2 dxy = ixy - quad;
+        
+        bool isCornerX = (dxy.x < 1.0 || dxy.x > 3.0);
+        bool isCornerY = (dxy.y < 1.0 || dxy.y > 3.0);
+        
+        if (isCornerX && isCornerY)
+        {
+            // Corner
+            dst = color0;
+        }
+        else
+        {
+            // Obtain the sample color
+            float2 sxy    = quad + 1.0;
+            float4 scolor = sampleNearest(src, sxy);
+            
+            bool isOn;
+            if (useGrayscale == 1)
+            {
+                isOn = scolor.r > threshold;
+            }
+            else
+            {
+                isOn = (scolor.r + scolor.g + scolor.b) / 3.0 > threshold;
+            }
+            
+            if (isOn)
+            {
+                // ON
+                if (isCornerX)
+                {
+                    dst = color2;
+                }
+                else
+                {
+                    if (isCornerY)
+                    {
+                        dst = color2;
+                    }
+                    else
+                    {
+                        dst = color3;
+                    }
+                }
+            }
+            else
+            {
+                // OFF
+                if (isCornerX || isCornerY)
+                {
+                    dst = color0;
+                }
+                else
+                {
+                    dst = color1;
+                }
+            }
+        }
+    }
+}

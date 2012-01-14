@@ -1,0 +1,87 @@
+<languageVersion : 1.0;>
+
+kernel CannyStep3
+<   namespace:"alumican";
+    vendor:"alumican.net";
+    version:1;
+    description:"Canny edge detector";
+>
+{
+    input  image4 src;
+    output pixel4 dst;
+    
+    void evaluatePixel()
+    {
+        // Center Pixel
+        float2 c_xy    = outCoord();
+        float4 c_color = sampleNearest(src, c_xy);
+        
+        // Around Pixel
+        float2 a_xy;
+        
+        // STEP3. Thinning (Non-maximum Suppression)
+        float d   = c_color.g + c_color.g + c_color.b;
+        float c_i = c_color.a;
+        float a_i;
+        
+        // < or <= ?
+        if (d == 0.0)
+        {
+            // 0 degree direction
+            a_xy = float2(c_xy.x - 1.0, c_xy.y);
+            if (c_i < sampleNearest(src, a_xy).a)
+            {
+                c_i = 0.0;
+            }
+            else
+            {
+                a_xy = float2(c_xy.x + 1.0, c_xy.y);
+                if (c_i < sampleNearest(src, a_xy).a) c_i = 0.0;
+            }
+        }
+        else if (d == 1.0)
+        {
+            // 45 degree direction
+            a_xy = float2(c_xy.x - 1.0, c_xy.y + 1.0);
+            if (c_i < sampleNearest(src, a_xy).a)
+            {
+                c_i = 0.0;
+            }
+            else
+            {
+                a_xy = float2(c_xy.x + 1.0, c_xy.y - 1.0);
+                if (c_i < sampleNearest(src, a_xy).a) c_i = 0.0;
+            }
+        }
+        else if (d == 2.0)
+        {
+            // 90 degree direction
+            a_xy = float2(c_xy.x, c_xy.y - 1.0);
+            if (c_i < sampleNearest(src, a_xy).a)
+            {
+                c_i = 0.0;
+            }
+            else
+            {
+                a_xy = float2(c_xy.x, c_xy.y + 1.0);
+                if (c_i < sampleNearest(src, a_xy).a) c_i = 0.0;
+            }
+        }
+        else
+        {
+            // 135 degree direction
+            a_xy = float2(c_xy.x - 1.0, c_xy.y - 1.0);
+            if (c_i < sampleNearest(src, a_xy).a)
+            {
+                c_i = 0.0;
+            }
+            else
+            {
+                a_xy = float2(c_xy.x + 1.0, c_xy.y + 1.0);
+                if (c_i < sampleNearest(src, a_xy).a) c_i = 0.0;
+            }
+        }
+        
+        dst.a = c_i;
+    }
+}

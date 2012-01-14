@@ -1,0 +1,143 @@
+﻿/**
+ * Progression 4
+ * 
+ * @author Copyright (C) 2007-2009 taka:nium.jp, All Rights Reserved.
+ * @version 4.0.1 Public Beta 1.1
+ * @see http://progression.jp/
+ * 
+ * Progression Software is released under the Progression Software License:
+ * http://progression.jp/ja/overview/license
+ * 
+ * Progression Libraries is released under the MIT License:
+ * http://www.opensource.org/licenses/mit-license.php
+ */
+package net.alumican.as3.framework.progression4.commands
+{
+	import flash.display.DisplayObject;
+	import flash.events.Event;
+	import flash.events.IEventDispatcher;
+	import jp.progression.casts.getInstanceById;
+	import jp.progression.commands.Command;
+	import jp.progression.commands.Func;
+	import jp.nium.utils.ObjectUtil;
+	import net.alumican.as3.framework.progression4.events.ActionEvent;
+	import net.alumican.as3.profiler.logger.LoggerUtil;
+	
+	/**
+	 * オブジェクトの初期化を実行するコマンド
+	 */
+	public class Initialize extends Command
+	{
+		//----------------------------------------
+		//CLASS CONSTANTS
+		
+		/**
+		 * 実行メソッド名
+		 */
+		static public const FUNC:String  = "initialize";
+		
+		/**
+		 * 完了イベントタイプ
+		 */
+		static public const EVENT:String = ActionEvent.COMPLETE;
+		
+		
+		
+		
+		
+		//----------------------------------------
+		//VARIABLES
+		
+		/**
+		 * インスタンスID
+		 */
+		public function get instanceID():String { return _instanceID; }
+		private var _instanceID:String;
+		
+		/**
+		 * 実行引数
+		 */
+		public function get args():Array { return _args; }
+		private var _args:Array;
+		
+		/**
+		 * 内部実行コマンド
+		 */
+		private var _command:Func;
+		
+		
+		
+		
+		
+		//----------------------------------------
+		//METHODS
+		
+		/**
+		 * コンストラクタ
+		 * @param	instanceID  インスタンスID
+		 * @param	initObject  初期化オブジェクト
+		 */
+		public function Initialize(instanceID:String, args:Array = null, initObject:Object = null):void
+		{
+			_instanceID = instanceID;
+			_args = args;
+			
+			var instance:DisplayObject = getInstanceById(_instanceID);
+			var func:Function          = instance[FUNC];
+			
+			_command = new Func(func, [args], instance, ActionEvent.COMPLETE, initObject);
+			_command.onComplete = _executeComplete;
+			
+			//親クラスを初期化する
+			super(_executeFunction, _interruptFunction, initObject);
+		}
+		
+		/**
+		 * コマンド実行ハンドラ
+		 */
+		private function _executeFunction():void
+		{
+			_command.execute();
+		}
+		
+		/**
+		 * コマンド中断ハンドラ
+		 */
+		private function _interruptFunction():void
+		{
+			_command.interrupt();
+		}
+		
+		/**
+		 * コマンド完了ハンドラ
+		 */
+		private function _executeComplete():void
+		{
+			if (super.state > 1)
+			{
+				//ログの送出
+				LoggerUtil.init = getInstanceById(_instanceID);
+				
+				super.executeComplete();
+			}
+		}
+		
+		/**
+		 * クローンを取得する
+		 * @return
+		 */
+		public override function clone():Command
+		{
+			return new Initialize(_instanceID, _args, this);
+		}
+		
+		/**
+		 * ストリング表現を取得する
+		 * @return
+		 */
+		public override function toString():String
+		{
+			return ObjectUtil.formatToString(this, super.className, super.id ? "id" : null, "instanceID", "args");
+		}
+	}
+}

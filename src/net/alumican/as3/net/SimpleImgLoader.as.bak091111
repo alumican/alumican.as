@@ -1,0 +1,175 @@
+﻿package net.alumican.as3.net
+{
+	import flash.display.Bitmap;
+	import flash.display.Loader;
+	import flash.display.LoaderInfo;
+	import flash.events.Event;
+	import flash.events.IOErrorEvent;
+	import flash.events.ProgressEvent;
+	import flash.events.SecurityErrorEvent;
+	import flash.net.URLRequest;
+	import flash.system.LoaderContext;
+	
+	/**
+	 * SimpleImgLoader
+	 * @author alumican.net<Yukiya Okuda>
+	 */
+	public class SimpleImgLoader
+	{
+		//----------------------------------------
+		//STATIC CONSTANTS
+		
+		
+		
+		
+		
+		//----------------------------------------
+		//VARIABLES
+		
+		/**
+		 * 読み込んだビットマップを取得します．
+		 */
+		public function get bmp():Bitmap { return _bmp; }
+		private var _bmp:Bitmap;
+		
+		/**
+		 * LoaderのLoaderContextを取得します．
+		 */
+		public function get context():LoaderContext { return _context; }
+		private var _context:LoaderContext;
+		
+		/**
+		 * 読み込み完了ハンドラ
+		 */
+		public var onLoadComplete:Function;
+		
+		/**
+		 * 読み込み進捗ハンドラ
+		 */
+		public var onLoadProgress:Function;
+		
+		/**
+		 * 読み込みIOエラーハンドラ
+		 */
+		public var onLoadIOError:Function;
+		
+		/**
+		 * 読み込みセキュリティエラーハンドラ
+		 */
+		public var onLoadSecurityError:Function;
+		
+		/**
+		 * Loader
+		 */
+		private var _loader:Loader;
+		
+		
+		
+		
+		
+		//----------------------------------------
+		//METHODS
+		
+		/**
+		 * SimpleImgLoaderインスタンスを生成します．
+		 */
+		public function SimpleImgLoader():void
+		{
+		}
+		
+		/**
+		 * データを読み込みます．
+		 * @param	url		読み込むデータのURL
+		 * @param	context	LoaderContext
+		 * @return
+		 */
+		public function load(url:String, context:LoaderContext = null):Loader
+		{
+			_context = (context != null) ? context : new LoaderContext(true);
+			
+			_loader = new Loader();
+			
+			_loader.contentLoaderInfo.addEventListener(Event.INIT, _loadInitHandler);
+			_loader.contentLoaderInfo.addEventListener(ProgressEvent.PROGRESS, _loadProgressHandler);
+			_loader.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, _loadIOErrorHandler);
+			_loader.contentLoaderInfo.addEventListener(SecurityErrorEvent.SECURITY_ERROR, _loadSecurityErrorHandler);
+			
+			_loader.load(new URLRequest(url), _context);
+			
+			return _loader;
+		}
+		
+		public function cancel():void
+		{
+			if (_loader == null) return;
+			
+			_loader.contentLoaderInfo.removeEventListener(Event.INIT, _loadInitHandler);
+			_loader.contentLoaderInfo.removeEventListener(ProgressEvent.PROGRESS, _loadProgressHandler);
+			_loader.contentLoaderInfo.removeEventListener(IOErrorEvent.IO_ERROR, _loadIOErrorHandler);
+			_loader.contentLoaderInfo.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, _loadSecurityErrorHandler);
+			
+			try
+			{
+				_loader.close();
+			}
+			catch (e:Error) { }
+		}
+		
+		/**
+		 * 読み込み完了ハンドラ
+		 * @param	e
+		 */
+		private function _loadInitHandler(e:Event):void 
+		{
+			_loader.contentLoaderInfo.removeEventListener(Event.INIT, _loadInitHandler);
+			_loader.contentLoaderInfo.removeEventListener(ProgressEvent.PROGRESS, _loadProgressHandler);
+			_loader.contentLoaderInfo.removeEventListener(IOErrorEvent.IO_ERROR, _loadIOErrorHandler);
+			_loader.contentLoaderInfo.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, _loadSecurityErrorHandler);
+			
+			_bmp = _loader.content as Bitmap;
+			
+			//コールバック関数の呼び出し
+			if (onLoadComplete != null) onLoadComplete(_bmp);
+		}
+		
+		/**
+		 * 読み込み進捗ハンドラ
+		 * @param	e
+		 */
+		private function _loadProgressHandler(e:ProgressEvent):void 
+		{
+			//コールバック関数の呼び出し
+			if (onLoadProgress != null) onLoadProgress(e.bytesLoaded, e.bytesTotal);
+		}
+		
+		/**
+		 * IOエラーハンドラ
+		 * @param	e
+		 */
+		private function _loadIOErrorHandler(e:IOErrorEvent):void 
+		{
+			_loader.contentLoaderInfo.removeEventListener(Event.COMPLETE, _loadInitHandler);
+			_loader.contentLoaderInfo.removeEventListener(ProgressEvent.PROGRESS, _loadProgressHandler);
+			_loader.contentLoaderInfo.removeEventListener(IOErrorEvent.IO_ERROR, _loadIOErrorHandler);
+			_loader.contentLoaderInfo.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, _loadSecurityErrorHandler);
+			
+			//コールバック関数の呼び出し
+			if (onLoadIOError != null) onLoadIOError(e);
+		}
+		
+		/**
+		 * セキュリティエラーハンドラ
+		 * @param	e
+		 */
+		private function _loadSecurityErrorHandler(e:SecurityErrorEvent):void 
+		{
+			_loader.contentLoaderInfo.removeEventListener(Event.COMPLETE, _loadInitHandler);
+			_loader.contentLoaderInfo.removeEventListener(ProgressEvent.PROGRESS, _loadProgressHandler);
+			_loader.contentLoaderInfo.removeEventListener(IOErrorEvent.IO_ERROR, _loadIOErrorHandler);
+			_loader.contentLoaderInfo.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, _loadSecurityErrorHandler);
+			
+			//コールバック関数の呼び出し
+			if (onLoadSecurityError != null) onLoadSecurityError(e);
+		}
+	}
+}

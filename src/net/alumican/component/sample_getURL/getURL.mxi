@@ -1,0 +1,41 @@
+<macromedia-extension
+
+  name="Basic Action Button"
+
+  version="1.2.0"
+
+  type="flashcomponentswc">
+
+<author name="ロクナナワークショップ" />
+
+<products>
+<product name="Flash" version="9" primary="true" />
+</products>
+
+<description>
+<![CDATA[
+ActionScript3.0でノンスクリプトで基本的なコンテンツを作るためのコンポーネントセットです。
+基本動作のをそのままフレームに配置したり、ボタンUIコンポーネントと組み合わせて使用します。
+詳しい使い方はこちら http://deepdive.67.org/components/ で確認してください。
+]]>
+</description>
+
+<ui-access>
+<![CDATA[
+rokunana Inc. / ロクナナワークショップ
+Copyright (C) rokunana & Co. All Rights Reserved.
+]]>
+</ui-access>
+
+<license-agreement>
+<![CDATA[
+このコンポーネントは無保証、無サポートです。
+Copyright (C) rokunana & Co. All Rights Reserved.
+]]>
+</license-agreement>
+
+<files>
+<file source="getURL.swc" destination="$flash/Components/Basic Action Button" />
+</files>
+
+</macromedia-extension>

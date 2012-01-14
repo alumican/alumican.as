@@ -1,0 +1,90 @@
+<languageVersion : 1.0;>
+
+kernel CannyStep4
+<   namespace:"alumican";
+    vendor:"alumican.net";
+    version:1;
+    description:"Canny edge detector";
+>
+{
+    input  image4 src;
+    output pixel4 dst;
+    
+    // Parameters
+    parameter float threshHigh
+    <
+        minValue     : 0.0;
+        maxValue     : 1.0;
+        defaultValue : 0.2;
+    >;
+    
+    parameter float threshLow
+    <
+        minValue     : 0.0;
+        maxValue     : 1.0;
+        defaultValue : 0.05;
+    >;
+    
+    void evaluatePixel()
+    {
+        // Center Pixel
+        float2 c_xy = outCoord();
+        
+        // Around Pixel
+        float2 a_xy;
+        
+        // STEP4. Hysteresis Threshold
+        float c_i = sampleNearest(src, c_xy).a;
+        float a_i;
+        
+        if (c_i >= threshHigh)
+        {
+            c_i = 1.0;
+        }
+        else if (c_i <= threshLow)
+        {
+            c_i = 0.0;
+        }
+        else
+        {
+            a_xy = float2(c_xy.x - 1.0, c_xy.y);
+            if (sampleNearest(src, a_xy).a == 1.0)
+            {
+                 c_i = 0.0;
+            }
+            else
+            {
+                a_xy = float2(c_xy.x + 1.0, c_xy.y);
+                if (sampleNearest(src, a_xy).a == 1.0)
+                {
+                    c_i = 0.0;
+                }
+                else
+                {
+                    a_xy = float2(c_xy.x, c_xy.y - 1.0);
+                    if (sampleNearest(src, a_xy).a == 1.0)
+                    {
+                        c_i = 0.0;
+                    }
+                    else
+                    {
+                        a_xy = float2(c_xy.x, c_xy.y + 1.0);
+                        if (sampleNearest(src, a_xy).a == 1.0)
+                        {
+                            c_i = 0.0;
+                        }
+                        else
+                        {
+                            c_i = 1.0;
+                        }
+                    }
+                }
+            }
+        }
+        
+        dst.r = c_i;
+        dst.g = c_i;
+        dst.b = c_i;
+        dst.a = 1.0;
+    }
+}

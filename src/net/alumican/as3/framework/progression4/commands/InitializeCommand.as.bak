@@ -1,0 +1,142 @@
+﻿/**
+ * Progression 4
+ * 
+ * @author Copyright (C) 2007-2009 taka:nium.jp, All Rights Reserved.
+ * @version 4.0.1 Public Beta 1.1
+ * @see http://progression.jp/
+ * 
+ * Progression Software is released under the Progression Software License:
+ * http://progression.jp/ja/overview/license
+ * 
+ * Progression Libraries is released under the MIT License:
+ * http://www.opensource.org/licenses/mit-license.php
+ */
+package net.alumican.as3.framework.progression4.commands
+{
+	import flash.display.DisplayObject;
+	import flash.events.Event;
+	import flash.events.IEventDispatcher;
+	import jp.progression.casts.getInstanceById;
+	import jp.progression.commands.Command;
+	import jp.progression.commands.CommandList;
+	import jp.progression.commands.Func;
+	import jp.nium.utils.ObjectUtil;
+	import net.alumican.as3.framework.progression4.events.DisplayEvent;
+	import net.alumican.as3.profiler.logger.LoggerUtil;
+	
+	/**
+	 * オブジェクトの初期化処理を実行するコマンド
+	 */
+	public class InitializeCommand extends Command
+	{
+		//----------------------------------------
+		//CLASS CONSTANTS
+		
+		/**
+		 * 実行メソッド名
+		 */
+		static public const FUNC:String  = "initializeCommand";
+		
+		
+		
+		
+		
+		//----------------------------------------
+		//VARIABLES
+		
+		/**
+		 * ターゲット
+		 */
+		public function get target():* { return _target; }
+		private var _target:*;
+		
+		/**
+		 * カスタム引数
+		 */
+		public function get args():Array { return _args; }
+		private var _args:Array;
+		
+		/**
+		 * ターゲットインスタンス
+		 */
+		private var _instance:*;
+		
+		
+		
+		
+		
+		//----------------------------------------
+		//METHODS
+		
+		/**
+		 * コンストラクタ
+		 * @param	instanceID  インスタンスID
+		 * @param	useTween    アニメーションさせる場合はtrue
+		 * @param	initObject  初期化オブジェクト
+		 */
+		public function InitializeCommand(target:*, args:Array = null, initObject:Object = null):void
+		{
+			_target = target;
+			_args = args;
+			
+			//親クラスを初期化する
+			super(_executeFunction, _interruptFunction, initObject);
+		}
+		
+		/**
+		 * コマンド実行ハンドラ
+		 */
+		private function _executeFunction():void
+		{
+			//ターゲットインスタンスからコマンドリストを取得
+			_instance = (_target is String) ? getInstanceById(_target) : _target;
+			var func:Function = _instance[FUNC];
+			var command:CommandList = func.apply(this, _args);
+			
+			//呼び出しもとのコマンドリストに挿入
+			parent.insertCommand(command);
+			
+			//完了
+			_executeComplete();
+		}
+		
+		/**
+		 * コマンド中断ハンドラ
+		 */
+		private function _interruptFunction():void
+		{
+		}
+		
+		/**
+		 * コマンド完了ハンドラ
+		 */
+		private function _executeComplete():void
+		{
+			if (super.state > 1)
+			{
+				super.executeComplete();
+				
+				//ログの送出
+				LoggerUtil.init = _instance;
+			}
+		}
+		
+		/**
+		 * クローンを取得する
+		 * @return
+		 */
+		public override function clone():Command
+		{
+			return new InitializeCommand(_target, _args, this);
+		}
+		
+		/**
+		 * ストリング表現を取得する
+		 * @return
+		 */
+		public override function toString():String
+		{
+			return ObjectUtil.formatToString(this, super.className, super.id ? "id" : null, "target", "args");
+		}
+	}
+}

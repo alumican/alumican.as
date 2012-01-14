@@ -1,0 +1,110 @@
+<languageVersion : 1.0;>
+
+kernel Susan5x5
+<   namespace:"Alumican";
+    vendor:"Alumican.net";
+    version:1;
+    description:"SUSAN feature point detecter";
+>
+{
+    input  image4 src;
+    output pixel4 dst;
+    
+    // Number of scaned pixels
+    const float N = 20.0;
+    
+    // Parameters
+    parameter float threshColor
+    <
+        minValue:0.0;
+        maxValue:1.0;
+        defaultValue:0.5;
+    >;
+    
+    parameter float threshCount
+    <
+        minValue:0.0;
+        maxValue:N;
+        defaultValue:N / 2.0;
+    >;
+    
+    parameter int outputMode
+    <
+        minValue:0;
+        maxValue:1;
+        defaultValue:0;
+    >;
+    
+    void
+    evaluatePixel()
+    {
+        // Obtain the input pixel color
+        float2 cxy    = outCoord();
+        float4 ccolor = sampleNearest(src, cxy);
+        
+        // 5x5 round filter
+        // 0aaa0
+        // aaaaa
+        // aacaa
+        // aaaaa
+        // 0aaa0
+        
+        float4 acolor;
+        float2 axy;
+        float  count = 0.0;
+        
+        axy = float2(cxy.x - 1.0, cxy.y - 2.0); acolor = sampleNearest(src, axy); if (abs(acolor.r - ccolor.r) > threshColor || abs(acolor.g - ccolor.g) > threshColor || abs(acolor.b - ccolor.b) > threshColor) ++count;
+        axy = float2(cxy.x      , cxy.y - 2.0); acolor = sampleNearest(src, axy); if (abs(acolor.r - ccolor.r) > threshColor || abs(acolor.g - ccolor.g) > threshColor || abs(acolor.b - ccolor.b) > threshColor) ++count;
+        axy = float2(cxy.x + 1.0, cxy.y - 2.0); acolor = sampleNearest(src, axy); if (abs(acolor.r - ccolor.r) > threshColor || abs(acolor.g - ccolor.g) > threshColor || abs(acolor.b - ccolor.b) > threshColor) ++count;
+        axy = float2(cxy.x - 2.0, cxy.y - 1.0); acolor = sampleNearest(src, axy); if (abs(acolor.r - ccolor.r) > threshColor || abs(acolor.g - ccolor.g) > threshColor || abs(acolor.b - ccolor.b) > threshColor) ++count;
+        axy = float2(cxy.x - 1.0, cxy.y - 1.0); acolor = sampleNearest(src, axy); if (abs(acolor.r - ccolor.r) > threshColor || abs(acolor.g - ccolor.g) > threshColor || abs(acolor.b - ccolor.b) > threshColor) ++count;
+        axy = float2(cxy.x      , cxy.y - 1.0); acolor = sampleNearest(src, axy); if (abs(acolor.r - ccolor.r) > threshColor || abs(acolor.g - ccolor.g) > threshColor || abs(acolor.b - ccolor.b) > threshColor) ++count;
+        axy = float2(cxy.x + 1.0, cxy.y - 1.0); acolor = sampleNearest(src, axy); if (abs(acolor.r - ccolor.r) > threshColor || abs(acolor.g - ccolor.g) > threshColor || abs(acolor.b - ccolor.b) > threshColor) ++count;
+        axy = float2(cxy.x + 2.0, cxy.y - 1.0); acolor = sampleNearest(src, axy); if (abs(acolor.r - ccolor.r) > threshColor || abs(acolor.g - ccolor.g) > threshColor || abs(acolor.b - ccolor.b) > threshColor) ++count;
+        axy = float2(cxy.x - 2.0, cxy.y      ); acolor = sampleNearest(src, axy); if (abs(acolor.r - ccolor.r) > threshColor || abs(acolor.g - ccolor.g) > threshColor || abs(acolor.b - ccolor.b) > threshColor) ++count;
+        axy = float2(cxy.x - 1.0, cxy.y      ); acolor = sampleNearest(src, axy); if (abs(acolor.r - ccolor.r) > threshColor || abs(acolor.g - ccolor.g) > threshColor || abs(acolor.b - ccolor.b) > threshColor) ++count;
+        axy = float2(cxy.x + 1.0, cxy.y      ); acolor = sampleNearest(src, axy); if (abs(acolor.r - ccolor.r) > threshColor || abs(acolor.g - ccolor.g) > threshColor || abs(acolor.b - ccolor.b) > threshColor) ++count;
+        axy = float2(cxy.x + 2.0, cxy.y      ); acolor = sampleNearest(src, axy); if (abs(acolor.r - ccolor.r) > threshColor || abs(acolor.g - ccolor.g) > threshColor || abs(acolor.b - ccolor.b) > threshColor) ++count;
+        axy = float2(cxy.x - 2.0, cxy.y + 1.0); acolor = sampleNearest(src, axy); if (abs(acolor.r - ccolor.r) > threshColor || abs(acolor.g - ccolor.g) > threshColor || abs(acolor.b - ccolor.b) > threshColor) ++count;
+        axy = float2(cxy.x - 1.0, cxy.y + 1.0); acolor = sampleNearest(src, axy); if (abs(acolor.r - ccolor.r) > threshColor || abs(acolor.g - ccolor.g) > threshColor || abs(acolor.b - ccolor.b) > threshColor) ++count;
+        axy = float2(cxy.x      , cxy.y + 1.0); acolor = sampleNearest(src, axy); if (abs(acolor.r - ccolor.r) > threshColor || abs(acolor.g - ccolor.g) > threshColor || abs(acolor.b - ccolor.b) > threshColor) ++count;
+        axy = float2(cxy.x + 1.0, cxy.y + 1.0); acolor = sampleNearest(src, axy); if (abs(acolor.r - ccolor.r) > threshColor || abs(acolor.g - ccolor.g) > threshColor || abs(acolor.b - ccolor.b) > threshColor) ++count;
+        axy = float2(cxy.x + 2.0, cxy.y + 1.0); acolor = sampleNearest(src, axy); if (abs(acolor.r - ccolor.r) > threshColor || abs(acolor.g - ccolor.g) > threshColor || abs(acolor.b - ccolor.b) > threshColor) ++count;
+        axy = float2(cxy.x - 1.0, cxy.y + 2.0); acolor = sampleNearest(src, axy); if (abs(acolor.r - ccolor.r) > threshColor || abs(acolor.g - ccolor.g) > threshColor || abs(acolor.b - ccolor.b) > threshColor) ++count;
+        axy = float2(cxy.x      , cxy.y + 2.0); acolor = sampleNearest(src, axy); if (abs(acolor.r - ccolor.r) > threshColor || abs(acolor.g - ccolor.g) > threshColor || abs(acolor.b - ccolor.b) > threshColor) ++count;
+        axy = float2(cxy.x + 1.0, cxy.y + 2.0); acolor = sampleNearest(src, axy); if (abs(acolor.r - ccolor.r) > threshColor || abs(acolor.g - ccolor.g) > threshColor || abs(acolor.b - ccolor.b) > threshColor) ++count;
+        
+        if (count >= threshCount)
+        {
+            if (outputMode == 0)
+            {
+                dst.r = 1.0;
+                dst.g = 0.0;
+                dst.b = 0.0;
+                dst.a = ccolor.a;
+            }
+            else if (outputMode == 1)
+            {
+                dst.rgb = ccolor.rgb;
+                dst.a   = count / N;
+            }
+            else if (outputMode == 2)
+            {
+                dst.rgb = ccolor.rgb;
+                dst.a   = count / N;
+            }
+        }
+        else
+        {
+            if (outputMode == 0)
+            {
+                dst = ccolor;
+            }
+            else if (outputMode == 1)
+            {
+                dst.rgb = ccolor.rgb;
+                dst.a   = 0.0;
+            }
+        }
+    }
+}

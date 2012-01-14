@@ -1,0 +1,56 @@
+<languageVersion : 1.0;> 
+kernel BackgroundDifferencing 
+<
+    namespace   : "net.alumican";
+    vendor      : "alumican";
+    version     : 1;
+    description : "Background Differencing";
+>
+{
+    input image4 background;
+    input image4 foreground;
+    
+    output pixel4 dst;
+    
+    parameter float range
+    <
+        minValue     : 0.0;
+        maxValue     : 1.0;
+        defaultValue : 0.1;
+    >;
+    
+    void evaluatePixel()
+    {
+        float4 a = sampleNearest(foreground, outCoord());
+        float4 b = sampleNearest(background, outCoord());
+        
+        /*
+        float dr = a.r - b.r; if (dr < 0) dr = -dr;
+        float dg = a.g - b.g; if (dg < 0) dg = -dg;
+        float db = a.b - b.b; if (db < 0) db = -db;
+        */
+        
+        /*
+        if (dr < 0.0) dst.r = -dr; else dst.r = dr;
+        if (dg < 0.0) dst.g = -dg; else dst.g = dg;
+        if (db < 0.0) dst.b = -db; else dst.b = db;
+        dst.a = 1.0;
+        */
+        
+        if ((abs(a.r - b.r) <= range) && (abs(a.g - b.g) <= range) && (abs(a.b - b.b) <= range))
+        //if (dr <= range && dg <= range && db <= range)
+        {
+            dst.r = 0.0;
+            dst.g = 0.0;
+            dst.b = 1.0;
+            dst.a = 0.0;
+        }
+        else
+        {
+            dst.r = a.r;
+            dst.g = a.g;
+            dst.b = a.b;
+            dst.a = 1.0;
+        }
+    }
+}
