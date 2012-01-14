@@ -1,0 +1,7 @@
+*
+
+!src/net/alumican/*
+!example/*
+
+!.gitignore
+!README
